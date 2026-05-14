@@ -1,0 +1,74 @@
+name: Compliance as Code Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  security-scan:
+    name: Scan - ${{ matrix.image-name }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Para o checkout do código
+      security-events: write # Para upload de relatórios SARIF
+      actions: read
+      packages: read
+
+    strategy:
+      fail-fast: false # Se uma falhar, não cancela as outras
+      matrix:
+        include:
+          - dockerfile: Dockerfile
+            context: .
+            image-name: root-app
+          - dockerfile: "Automação de Criação Usuário Zabbix/backend/Dockerfile"
+            context: "Automação de Criação Usuário Zabbix/backend"
+            image-name: zabbix-backend
+          - dockerfile: "Automação de Criação Usuário Zabbix/frontend/Dockerfile"
+            context: "Automação de Criação Usuário Zabbix/frontend"
+            image-name: zabbix-frontend
+
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necessário para analisar todo o histórico de commits
+
+      - name: Gitleaks - Scan de Segredos
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_SUMMARY: true
+
+      - name: Build Local da Imagem Docker
+        run: docker build -f "${{ matrix.dockerfile }}" -t ${{ matrix.image-name }}:local "${{ matrix.context }}"
+
+      - name: Trivy - Scan de Vulnerabilidades (Aviso - MEDIUM, LOW)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ matrix.image-name }}:local'
+          format: 'sarif'
+          output: 'trivy-${{ matrix.image-name }}.sarif'
+          severity: 'LOW,MEDIUM'
+          vuln-type: 'os,library'
+          scanners: 'vuln,secret,misconfig'
+          exit-code: '0' # Nunca falha, apenas avisa
+
+      - name: Upload Trivy SARIF Report (Avisos)
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() # Faz o upload mesmo se passos anteriores falharem
+        with:
+          sarif_file: 'trivy-${{ matrix.image-name }}.sarif'
+          category: 'trivy-${{ matrix.image-name }}'
+
+      - name: Trivy - Scan de Vulnerabilidades (Bloqueio - HIGH, CRITICAL)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ matrix.image-name }}:local'
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          vuln-type: 'os,library'
+          scanners: 'vuln,secret,misconfig'
+          exit-code: '1' # Falha a pipeline (Gatekeeper)

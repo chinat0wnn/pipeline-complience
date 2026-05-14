@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provisionamento de Usuários - Zabbix</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/form.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1 class="app-header__title">Portal de Provisionamento</h1>
+            <p class="app-header__subtitle">Gerenciamento de acessos Zabbix & Grafana</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card">
+            <h2 class="card__title">Novo Usuário</h2>
+
+            <form id="provision-form" class="form">
+                <!-- Grafana integration paused 
+                <div class="form__row">
+                    <div class="form__group">
+                        <label class="form__label">Sistemas de Destino</label>
+                        <div class="form__checkbox-group">
+                            <label class="form__checkbox-label">
+                                <input type="checkbox" name="targets" value="zabbix" checked> Zabbix
+                            </label>
+                            <label class="form__checkbox-label">
+                                <input type="checkbox" name="targets" value="grafana" checked> Grafana
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                -->
+
+                <div class="form__group">
+                    <label for="alias" class="form__label">Username (SSO)</label>
+                    <input type="text" id="alias" name="alias" class="form__input" required placeholder="Ex: breno.souza">
+                    <span class="form__help">Deve ser idêntico ao login do Windows/SAML.</span>
+                </div>
+
+                <!-- Email currently not used since Grafana is paused 
+                <div class="form__group">
+                    <label for="email" class="form__label">E-mail</label>
+                    <input type="email" id="email" name="email" class="form__input" required placeholder="breno.souza@dataside.com.br">
+                </div>
+                -->
+
+                <div class="form__row">
+                    <div class="form__group">
+                        <label for="name" class="form__label">Nome</label>
+                        <input type="text" id="name" name="name" class="form__input" required placeholder="Breno">
+                    </div>
+
+                    <div class="form__group">
+                        <label for="surname" class="form__label">Sobrenome</label>
+                        <input type="text" id="surname" name="surname" class="form__input" required placeholder="Brasil de Souza">
+                    </div>
+                </div>
+
+                <div class="form__row">
+                    <div class="form__group">
+                        <label for="role" class="form__label">Tipo de Usuário</label>
+                        <select id="role" name="role" class="form__input" required>
+                            <option value="" disabled selected>Selecione o tipo...</option>
+                            <option value="1">Zabbix User</option>
+                            <option value="2">Zabbix Admin</option>
+                            <option value="3">Zabbix Super Admin</option>
+                        </select>
+                    </div>
+
+                    <div class="form__group">
+                        <label for="squad" class="form__label">Squad / Área Base</label>
+                        <select id="squad" name="squad" class="form__input" required>
+                            <option value="" disabled selected>Selecione a squad...</option>
+                            <option value="infra">Squad Infraestrutura</option>
+                            <option value="db">Squad Banco de Dados</option>
+                            <option value="dev">Squad Desenvolvimento</option>
+                        </select>
+                    </div>
+
+                    <div class="form__group">
+                        <label for="groups" class="form__label">Grupos Adicionais (Opcional)</label>
+                        <select id="groups" name="groups" class="form__input form__select--multiple" multiple size="4">
+                            <option value="" disabled>Carregando grupos...</option>
+                        </select>
+                        <span class="form__help" style="font-size: 0.8rem; margin-top: 4px; display: block; color: var(--text-muted);">Segure CTRL (Windows) ou CMD (Mac) para selecionar múltiplos.</span>
+                    </div>
+                </div>
+
+                <div class="form__actions">
+                    <button type="submit" class="btn btn--primary" id="submit-btn">
+                        <span class="btn__text">Provisionar Usuário</span>
+                        <span class="btn__spinner hidden"></span>
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <div class="toast-container">
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

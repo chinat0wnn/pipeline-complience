@@ -1,0 +1,14 @@
+# Configuração do Gitleaks
+# Use este arquivo para adicionar regras customizadas, ignorar testes falsos positivos, etc.
+
+title = "Configuração Customizada do Gitleaks"
+
+[allowlist]
+description = "Ignorar arquivos de teste que contêm chaves falsas"
+paths = [
+    '''tests/.*''',
+    '''mock/.*'''
+]
+# regexes = [
+#    '''AKIA[0-9A-Z]{16}''' # Exemplo de regex para ignorar caso seja uma chave falsa conhecida
+# ]
